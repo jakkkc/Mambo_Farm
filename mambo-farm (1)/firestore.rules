@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && getUserData().role == 'admin';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    
+    function isValidId(id) {
+       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Entity Validations ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.uid == request.auth.uid &&
+             data.role in ['admin', 'standard'] &&
+             data.email is string && data.email.size() <= 128;
+    }
+
+    function isValidSale(data) {
+      return data.keys().hasAll(['item', 'quantity', 'totalPrice', 'date', 'category', 'recordedBy']) &&
+             data.item is string && data.item.size() <= 200 &&
+             data.quantity is number &&
+             data.totalPrice is number &&
+             data.category in ['Poultry', 'Honey', 'Eggs', 'Other'];
+    }
+
+    function isValidExpense(data) {
+      return data.keys().hasAll(['description', 'amount', 'category', 'date', 'recordedBy']) &&
+             data.description is string && data.description.size() <= 500 &&
+             data.amount is number &&
+             data.category in ['Feed', 'Medicine', 'Equipment', 'Labor', 'Other'];
+    }
+
+    function isValidPoultryBatch(data) {
+      return data.keys().hasAll(['type', 'count', 'arrivalDate', 'status']) &&
+             data.type in ['Layers', 'Broilers', 'Kienyeji'] &&
+             data.count is number &&
+             data.status in ['Active', 'Sold', 'Deceased'];
+    }
+
+    function isValidBeehive(data) {
+      return data.keys().hasAll(['location', 'type', 'status']) &&
+             data.location is string && data.location.size() <= 200 &&
+             data.type in ['Langstroth', 'KTBH', 'Traditional'] &&
+             data.status in ['Active', 'Empty', 'Harvest Ready'];
+    }
+
+    function isValidNotification(data) {
+      return data.keys().hasAll(['title', 'message', 'type', 'status', 'createdAt']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.status in ['unread', 'read'];
+    }
+
+    // --- Collection Rules ---
+
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(uid) && isValidUser(request.resource.data);
+      allow update: if isSignedIn() && (isOwner(uid) || isAdmin()) && 
+                    (isOwner(uid) ? request.resource.data.role == resource.data.role : true);
+    }
+
+    match /poultryBatches/{batchId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidPoultryBatch(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /beehives/{beehiveId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidBeehive(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /sales/{saleId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidSale(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /expenses/{expenseId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidExpense(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidNotification(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

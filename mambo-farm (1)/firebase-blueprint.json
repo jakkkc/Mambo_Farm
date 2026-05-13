@@ -1,0 +1,110 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "App user with role and farm association",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "standard"] },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "PoultryBatch": {
+      "title": "Poultry Batch",
+      "description": "Tracking a specific batch of poultry (e.g., layers, broilers)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["Layers", "Broilers", "Kienyeji"] },
+        "count": { "type": "number" },
+        "arrivalDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Active", "Sold", "Deceased"] },
+        "lastUpdate": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Beehive": {
+      "title": "Beehive",
+      "description": "Tracking individual beehives",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "location": { "type": "string" },
+        "type": { "type": "string", "enum": ["Langstroth", "KTBH", "Traditional"] },
+        "status": { "type": "string", "enum": ["Active", "Empty", "Harvest Ready"] },
+        "lastInspection": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "Record of a farm product sale",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "item": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "totalPrice": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "category": { "type": "string", "enum": ["Poultry", "Honey", "Eggs", "Other"] },
+        "recordedBy": { "type": "string" }
+      }
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Record of farm expenses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string", "enum": ["Feed", "Medicine", "Equipment", "Labor", "Other"] },
+        "date": { "type": "string", "format": "date-time" },
+        "recordedBy": { "type": "string" }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Farm events and alerts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["info", "warning", "task"] },
+        "status": { "type": "string", "enum": ["unread", "read"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "dueDate": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/poultryBatches/{batchId}": {
+      "schema": "PoultryBatch",
+      "description": "Poultry inventory"
+    },
+    "/beehives/{beehiveId}": {
+      "schema": "Beehive",
+      "description": "Beekeeping inventory"
+    },
+    "/sales/{saleId}": {
+      "schema": "Sale",
+      "description": "Sales history"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Expense records"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "System alerts"
+    }
+  }
+}
