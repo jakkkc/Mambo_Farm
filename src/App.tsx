@@ -23,10 +23,9 @@ import { format } from 'date-fns';
 
 // --- Components ---
 
-const Sidebar = ({ activeTab, setActiveTab, userRole }: { 
+const Sidebar = ({ activeTab, setActiveTab }: { 
   activeTab: string, 
-  setActiveTab: (tab: string) => void,
-  userRole: UserRole 
+  setActiveTab: (tab: string) => void
 }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,42 +37,63 @@ const Sidebar = ({ activeTab, setActiveTab, userRole }: {
   ];
 
   return (
-    <div className="w-20 lg:w-64 bg-slate-900 text-slate-100 flex flex-col h-[calc(100vh-2rem)] sticky top-4 m-4 rounded-[2.5rem] z-50 shadow-2xl">
-      <div className="p-4 lg:p-8 flex flex-col items-center lg:items-start">
-        <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-black text-xl mb-2">M</div>
-        <h1 className="hidden lg:block font-display text-2xl font-black text-white italic">Mambo Farm</h1>
-        <p className="hidden lg:block text-slate-500 text-[10px] mt-1 uppercase tracking-[0.2em] font-bold">Bungoma, Kenya</p>
-      </div>
-
-      <nav className="flex-1 px-3 lg:px-6 py-4 space-y-3 overflow-y-auto scrollbar-hide">
+    <>
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-6 left-6 right-6 bg-slate-900/95 backdrop-blur-xl border border-white/10 text-slate-400 flex items-center justify-around p-4 rounded-[2.5rem] z-[100] shadow-2xl">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
             className={cn(
-              "w-full flex items-center justify-center lg:justify-start space-x-0 lg:space-x-4 px-3 py-4 rounded-2xl transition-all text-sm font-bold",
-              activeTab === item.id 
-                ? "bg-emerald-600 text-white shadow-xl shadow-emerald-600/30" 
-                : "text-slate-500 hover:bg-white/5 hover:text-slate-100"
+              "p-3 rounded-2xl transition-all relative",
+              activeTab === item.id ? "text-emerald-400 scale-110 bg-white/5" : "hover:text-slate-100"
             )}
-            title={item.label}
           >
-            <item.icon size={20} />
-            <span className="hidden lg:block">{item.label}</span>
+            <item.icon size={22} />
+            {activeTab === item.id && (
+              <motion.div layoutId="mobileTabEffect" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-emerald-400 rounded-full" />
+            )}
           </button>
         ))}
       </nav>
 
-      <div className="p-4 lg:p-6 border-t border-slate-800">
-        <button 
-          onClick={() => signOut(auth)}
-          className="w-full flex items-center justify-center lg:justify-start space-x-0 lg:space-x-4 px-3 py-4 text-slate-500 hover:text-rose-400 transition-colors rounded-2xl"
-        >
-          <LogOut size={20} />
-          <span className="hidden lg:block text-sm font-bold">Log Out</span>
-        </button>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex w-64 bg-slate-900 text-slate-100 flex-col h-[calc(100vh-2rem)] sticky top-4 m-4 rounded-[2.5rem] z-50 shadow-2xl overflow-hidden shrink-0">
+        <div className="p-8">
+          <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-black text-xl mb-4">M</div>
+          <h1 className="font-display text-2xl font-black text-white italic">Mambo Farm</h1>
+          <p className="text-slate-500 text-[10px] mt-1 uppercase tracking-[0.2em] font-bold">Bungoma, Kenya</p>
+        </div>
+
+        <nav className="flex-1 px-6 py-4 space-y-2 overflow-y-auto scrollbar-hide">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={cn(
+                "w-full flex items-center space-x-4 px-4 py-4 rounded-2xl transition-all text-sm font-bold",
+                activeTab === item.id 
+                  ? "bg-emerald-600 text-white shadow-xl shadow-emerald-600/30" 
+                  : "text-slate-500 hover:bg-white/5 hover:text-slate-100"
+              )}
+            >
+              <item.icon size={20} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-6 border-t border-slate-800">
+          <button 
+            onClick={() => signOut(auth)}
+            className="w-full flex items-center space-x-4 px-4 py-4 text-slate-400 hover:text-rose-400 transition-colors rounded-2xl font-bold text-sm"
+          >
+            <LogOut size={20} />
+            <span>Log Out</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -83,9 +103,9 @@ const Header = ({ title, userEmail, userRole, notifications }: {
   userRole: string,
   notifications: Notification[]
 }) => (
-  <header className="flex justify-between items-center p-6 bg-white rounded-3xl shadow-sm border border-slate-200 mb-6 mx-4 mt-4">
-    <div className="flex items-center space-x-4">
-      <div className="lg:hidden w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-black text-xl">M</div>
+  <header className="flex justify-between items-center p-4 lg:p-6 bg-white rounded-3xl shadow-sm border border-slate-200 mb-6 mx-4 mt-4">
+    <div className="flex items-center space-x-3 lg:space-x-4">
+      <div className="lg:hidden w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">M</div>
       <div>
         <h2 className="text-xl font-black text-slate-900 tracking-tight">{title}</h2>
         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-none mt-1">Farm Management System</p>
@@ -273,7 +293,7 @@ const BatchModal = ({ onClose, userUid }: { onClose: () => void, userUid: string
       status: 'Active',
       lastUpdate: new Date().toISOString()
     };
-    await addDoc(collection(db, 'poultry_batches'), data);
+    await addDoc(collection(db, 'poultryBatches'), data);
     setLoading(false);
     onClose();
   };
@@ -599,7 +619,7 @@ export default function App() {
         setHives(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Beehive)));
       });
 
-      const qBatches = query(collection(db, 'poultry_batches'));
+      const qBatches = query(collection(db, 'poultryBatches'));
       const unsubBatches = onSnapshot(qBatches, (snap) => {
         setBatches(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as PoultryBatch)));
       });
@@ -621,11 +641,11 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-stone-50">
+      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
         <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full"
+          animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full shadow-lg"
         />
       </div>
     );
@@ -633,63 +653,46 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
-        <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-8">
-          <div className="bento-card-dark overflow-hidden relative min-h-[600px] flex flex-col justify-end p-12">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 lg:p-8">
+        <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-4 lg:gap-8">
+          <div className="bento-card-dark overflow-hidden relative min-h-[400px] lg:min-h-[700px] flex flex-col justify-end p-8 lg:p-16">
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 opacity-80 z-10" />
             <img 
               src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&q=80&w=2000" 
               alt="Farm" 
-              className="absolute inset-0 h-full w-full object-cover grayscale opacity-40 group-hover:scale-105 transition-transform duration-1000"
+              className="absolute inset-0 h-full w-full object-cover grayscale opacity-40"
             />
             <div className="relative z-20">
-              <div className="w-16 h-16 bg-brand-primary rounded-2xl flex items-center justify-center text-white font-black text-4xl mb-8 shadow-2xl shadow-emerald-500/20">M</div>
-              <h1 className="font-display text-6xl font-black text-white mb-6 italic tracking-tight leading-none">Mambo Farm Bungoma</h1>
-              <p className="text-slate-400 text-lg leading-relaxed font-medium">
-                Resilient poultry and beekeeping solutions powered by industrial-grade security.
+              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-brand-primary rounded-2xl flex items-center justify-center text-white font-black text-2xl lg:text-4xl mb-8 shadow-2xl">M</div>
+              <h1 className="font-display text-4xl lg:text-7xl font-black text-white mb-6 italic tracking-tight leading-tight">Mambo Farm Bungoma</h1>
+              <p className="text-slate-400 text-base lg:text-xl leading-relaxed font-medium max-w-sm">
+                Industrial-grade poultry and beekeeping management for modern agriculture.
               </p>
-              <div className="flex items-center space-x-4 mt-12 pt-12 border-t border-white/10">
-                <div className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black tracking-widest text-emerald-400 uppercase">Region: Western Kenya</div>
-                <div className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black tracking-widest text-amber-400 uppercase">Status: Enterprise Ready</div>
-              </div>
             </div>
           </div>
 
-          <div className="bento-card bg-white flex flex-col justify-center p-12 lg:p-20">
-            <div className="mb-16">
-              <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Access Portal</h2>
-              <p className="text-slate-500 font-medium italic">Authenticate with your farm credentials</p>
+          <div className="bento-card bg-white flex flex-col justify-center p-8 lg:p-24">
+            <div className="mb-12 lg:mb-20">
+              <h2 className="text-3xl lg:text-5xl font-black text-slate-900 mb-4 tracking-tight">Welcome Back</h2>
+              <p className="text-slate-500 font-medium italic">Sign in to manage your farm's active batches and hives.</p>
             </div>
 
             <button 
               onClick={handleLogin}
-              className="group w-full flex items-center justify-center space-x-4 py-5 bg-slate-900 text-white rounded-3xl font-black hover:bg-slate-800 transition-all active:scale-95 shadow-2xl shadow-slate-200 overflow-hidden relative"
+              className="group w-full flex items-center justify-center space-x-4 py-6 bg-slate-900 text-white rounded-[2rem] font-black hover:bg-slate-800 transition-all active:scale-95 shadow-2xl shadow-slate-200 overflow-hidden relative"
             >
               <div className="absolute inset-0 bg-brand-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               <div className="relative z-10 flex items-center space-x-4">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                   <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
                 </div>
-                <span className="uppercase tracking-widest text-sm">Secure Google Login</span>
+                <span className="uppercase tracking-widest text-xs lg:text-sm">Connect with Google</span>
               </div>
             </button>
 
-            <div className="mt-16 space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="p-2 bg-slate-50 rounded-xl text-slate-400">
-                  <Shield size={20} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-tighter">Zero-Trust Environment</h4>
-                  <p className="text-xs text-slate-400 font-medium leading-relaxed">Your session is protected by multi-layer encryption and real-time audit logging.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-auto pt-20 flex items-center justify-center space-x-3 text-[10px] text-slate-300 font-black uppercase tracking-widest">
-              <span>System Design</span>
-              <div className="w-1 h-1 bg-slate-200 rounded-full" />
-              <span className="text-slate-600">Jackson Munene from Nex-Ink</span>
+            <div className="mt-12 lg:mt-24 pt-12 border-t border-slate-100 flex flex-col items-center">
+              <span className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Enterprise Platform Designed By</span>
+              <span className="text-[11px] text-slate-500 font-black uppercase mt-2 tracking-tighter">Jackson Munene from Nex-Ink</span>
             </div>
           </div>
         </div>
@@ -698,10 +701,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex bg-stone-50">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} userRole={user.role} />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 mb-32 lg:mb-0">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen">
         <Header 
           title={activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} 
           userEmail={user.email} 
