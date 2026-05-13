@@ -123,6 +123,236 @@ const Footer = () => (
   </footer>
 );
 
+const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+        >
+          <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">{title}</h3>
+            <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400 hover:text-slate-600">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="p-8 max-h-[70vh] overflow-y-auto scrollbar-hide">
+            {children}
+          </div>
+        </motion.div>
+      </div>
+    )}
+  </AnimatePresence>
+);
+
+const SaleModal = ({ onClose, userUid }: { onClose: () => void, userUid: string }) => {
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      item: formData.get('item'),
+      quantity: Number(formData.get('quantity')),
+      unit: formData.get('unit'),
+      totalPrice: Number(formData.get('totalPrice')),
+      category: formData.get('category'),
+      date: new Date().toISOString(),
+      recordedBy: userUid
+    };
+    await addDoc(collection(db, 'sales'), data);
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="Log New Sale">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Item Name</label>
+          <input required name="item" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="e.g. Tray of Eggs" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Quantity</label>
+            <input required type="number" name="quantity" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="10" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Unit</label>
+            <input required name="unit" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="Tray" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Category</label>
+          <select name="category" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all appearance-none cursor-pointer">
+            <option value="Eggs">Eggs</option>
+            <option value="Poultry">Poultry</option>
+            <option value="Honey">Honey</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Total Amount (KSh)</label>
+          <input required type="number" name="totalPrice" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="4500" />
+        </div>
+        <button disabled={loading} type="submit" className="w-full py-5 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all shadow-xl shadow-emerald-500/20">
+          {loading ? 'Processing...' : 'Confirm Entry'}
+        </button>
+      </form>
+    </Modal>
+  );
+};
+
+const ExpenseModal = ({ onClose, userUid }: { onClose: () => void, userUid: string }) => {
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      description: formData.get('description'),
+      amount: Number(formData.get('amount')),
+      category: formData.get('category'),
+      date: new Date().toISOString(),
+      recordedBy: userUid
+    };
+    await addDoc(collection(db, 'expenses'), data);
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="Record Expense">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Description</label>
+          <input required name="description" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-rose-500 rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="e.g. 50kg Layer Feed" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Category</label>
+          <select name="category" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-rose-500 rounded-2xl outline-none font-bold text-slate-700 transition-all appearance-none cursor-pointer">
+            <option value="Feed">Feed</option>
+            <option value="Medicine">Medicine</option>
+            <option value="Equipment">Equipment</option>
+            <option value="Labor">Labor</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Amount (KSh)</label>
+          <input required type="number" name="amount" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-rose-500 rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="3200" />
+        </div>
+        <button disabled={loading} type="submit" className="w-full py-5 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-rose-700 active:scale-95 transition-all shadow-xl shadow-rose-500/20">
+          {loading ? 'Logging...' : 'Save Expense'}
+        </button>
+      </form>
+    </Modal>
+  );
+};
+
+const BatchModal = ({ onClose, userUid }: { onClose: () => void, userUid: string }) => {
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      type: formData.get('type'),
+      count: Number(formData.get('count')),
+      arrivalDate: formData.get('arrivalDate'),
+      status: 'Active',
+      lastUpdate: new Date().toISOString()
+    };
+    await addDoc(collection(db, 'poultry_batches'), data);
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="New Poultry Batch">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Bird Type</label>
+          <select name="type" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all appearance-none cursor-pointer">
+            <option value="Layers">Layers</option>
+            <option value="Broilers">Broilers</option>
+            <option value="Kienyeji">Kienyeji</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Bird Count</label>
+          <input required type="number" name="count" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="100" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Arrival Date</label>
+          <input required type="date" name="arrivalDate" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-primary rounded-2xl outline-none font-bold text-slate-700 transition-all" />
+        </div>
+        <button disabled={loading} type="submit" className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all shadow-xl shadow-slate-200">
+          {loading ? 'Registering...' : 'Register Batch'}
+        </button>
+      </form>
+    </Modal>
+  );
+};
+
+const HiveModal = ({ onClose, userUid }: { onClose: () => void, userUid: string }) => {
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      location: formData.get('location'),
+      type: formData.get('type'),
+      status: formData.get('status'),
+      lastInspection: new Date().toISOString()
+    };
+    await addDoc(collection(db, 'beehives'), data);
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="Add Beehive">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Location Identifier</label>
+          <input required name="location" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-secondary rounded-2xl outline-none font-bold text-slate-700 transition-all" placeholder="e.g. North Orchard" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Hive Type</label>
+          <select name="type" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-secondary rounded-2xl outline-none font-bold text-slate-700 transition-all appearance-none cursor-pointer">
+            <option value="Langstroth">Langstroth</option>
+            <option value="KTBH">KTBH (Kenya Top Bar)</option>
+            <option value="Traditional">Traditional Log</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Initial Status</label>
+          <select name="status" className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-brand-secondary rounded-2xl outline-none font-bold text-slate-700 transition-all appearance-none cursor-pointer">
+            <option value="Active">Active Coloni</option>
+            <option value="Empty">Empty / Setup</option>
+            <option value="Harvest Ready">Harvest Ready</option>
+          </select>
+        </div>
+        <button disabled={loading} type="submit" className="w-full py-5 bg-amber-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-amber-700 active:scale-95 transition-all shadow-xl shadow-amber-500/20">
+          {loading ? 'Adding...' : 'Initialize Hive'}
+        </button>
+      </form>
+    </Modal>
+  );
+};
+
 // --- Main Pages ---
 
 const DashboardPage = ({ sales, expenses, notifications }: { sales: Sale[], expenses: Expense[], notifications: Notification[] }) => {
@@ -310,7 +540,15 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [sales, setSales] = useState<Sale[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [hives, setHives] = useState<Beehive[]>([]);
+  const [batches, setBatches] = useState<PoultryBatch[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  
+  // Modal States
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [isHiveModalOpen, setIsHiveModalOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -356,10 +594,22 @@ export default function App() {
         setNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification)));
       });
 
+      const qHives = query(collection(db, 'beehives'));
+      const unsubHives = onSnapshot(qHives, (snap) => {
+        setHives(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Beehive)));
+      });
+
+      const qBatches = query(collection(db, 'poultry_batches'));
+      const unsubBatches = onSnapshot(qBatches, (snap) => {
+        setBatches(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as PoultryBatch)));
+      });
+
       return () => {
         unsubSales();
         unsubExpenses();
         unsubNotifications();
+        unsubHives();
+        unsubBatches();
       };
     }
   }, [user]);
@@ -456,6 +706,7 @@ export default function App() {
           title={activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} 
           userEmail={user.email} 
           userRole={user.role} 
+          notifications={notifications}
         />
         
         <div className="p-8 flex-1">
@@ -468,34 +719,44 @@ export default function App() {
               transition={{ duration: 0.3 }}
             >
               {activeTab === 'dashboard' && (
-                <DashboardPage sales={sales} expenses={expenses} />
+                <DashboardPage sales={sales} expenses={expenses} notifications={notifications} />
               )}
               
               {activeTab === 'poultry' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">Poultry Batches</h3>
-                    <button className="farm-btn-primary flex items-center space-x-2">
+                    <button 
+                      onClick={() => setIsBatchModalOpen(true)}
+                      className="farm-btn-primary flex items-center space-x-2"
+                    >
                       <Plus size={18} />
                       <span>New Batch</span>
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bento-card group hover:border-brand-primary transition-all">
-                      <div className="flex justify-between items-start mb-4">
-                        <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black tracking-widest uppercase">LAYERS</span>
-                        <span className="text-slate-400 text-[10px] font-bold">#BT-01</span>
+                    {batches.length === 0 ? (
+                      <div className="col-span-full bento-card py-12 text-center text-slate-400 italic">No batches recorded yet.</div>
+                    ) : batches.map(batch => (
+                      <div key={batch.id} className="bento-card group hover:border-brand-primary transition-all">
+                        <div className="flex justify-between items-start mb-4">
+                          <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black tracking-widest uppercase">{batch.type}</span>
+                          <span className="text-slate-400 text-[10px] font-bold">#{batch.id.slice(0, 5).toUpperCase()}</span>
+                        </div>
+                        <h4 className="text-3xl font-black text-slate-900 mb-1">{batch.count} Birds</h4>
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-tight mb-6">Arrived: {format(new Date(batch.arrivalDate), 'MMM d, yyyy')}</p>
+                        <div className="flex justify-between items-center text-xs pt-4 border-t border-slate-50">
+                          <span className={cn(
+                            "font-black flex items-center space-x-1 uppercase tracking-tighter",
+                            batch.status === 'Active' ? "text-emerald-600" : "text-slate-400"
+                          )}>
+                            {batch.status === 'Active' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                            <span>{batch.status}</span>
+                          </span>
+                          <ChevronRight size={18} className="text-slate-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all" />
+                        </div>
                       </div>
-                      <h4 className="text-3xl font-black text-slate-900 mb-1">250 Birds</h4>
-                      <p className="text-slate-500 text-xs font-bold uppercase tracking-tight mb-6">Status: Late Stage Peak</p>
-                      <div className="flex justify-between items-center text-xs pt-4 border-t border-slate-50">
-                        <span className="text-emerald-600 font-black flex items-center space-x-1 uppercase tracking-tighter">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          <span>Active Production</span>
-                        </span>
-                        <ChevronRight size={18} className="text-slate-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -504,26 +765,33 @@ export default function App() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">Beehives</h3>
-                    <button className="farm-btn-primary flex items-center space-x-2">
+                    <button 
+                      onClick={() => setIsHiveModalOpen(true)}
+                      className="farm-btn-primary flex items-center space-x-2"
+                    >
                       <Plus size={18} />
                       <span>Add Hive</span>
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bento-card group hover:border-brand-secondary transition-all">
-                      <div className="flex justify-between items-start mb-4">
-                        <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black tracking-widest uppercase">LANGSTROTH</span>
-                        <span className="text-slate-400 text-[10px] font-bold">#HV-04</span>
+                    {hives.length === 0 ? (
+                      <div className="col-span-full bento-card py-12 text-center text-slate-400 italic">No hives recorded yet.</div>
+                    ) : hives.map(hive => (
+                      <div key={hive.id} className="bento-card group hover:border-brand-secondary transition-all">
+                        <div className="flex justify-between items-start mb-4">
+                          <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black tracking-widest uppercase">{hive.type}</span>
+                          <span className="text-slate-400 text-[10px] font-bold">#{hive.id.slice(0, 5).toUpperCase()}</span>
+                        </div>
+                        <h4 className="text-3xl font-black text-slate-900 mb-1">{hive.location}</h4>
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-tight mb-6">Type: {hive.type}</p>
+                        <div className="flex justify-between items-center text-xs pt-4 border-t border-slate-50">
+                          <span className="text-amber-600 font-black flex items-center space-x-1 uppercase tracking-tighter">
+                            <span>{hive.status}</span>
+                          </span>
+                          <ChevronRight size={18} className="text-slate-300 group-hover:text-brand-secondary group-hover:translate-x-1 transition-all" />
+                        </div>
                       </div>
-                      <h4 className="text-3xl font-black text-slate-900 mb-1">East Block</h4>
-                      <p className="text-slate-500 text-xs font-bold uppercase tracking-tight mb-6">Last Check: 2 Days Ago</p>
-                      <div className="flex justify-between items-center text-xs pt-4 border-t border-slate-50">
-                        <span className="text-amber-600 font-black flex items-center space-x-1 uppercase tracking-tighter">
-                          <span>Harvest Ready</span>
-                        </span>
-                        <ChevronRight size={18} className="text-slate-300 group-hover:text-brand-secondary group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -534,10 +802,22 @@ export default function App() {
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">Financial Ledger</h3>
                     <div className="flex space-x-3">
                       <button className="farm-btn-secondary text-sm">Download Report</button>
-                      <button className="farm-btn-primary text-sm flex items-center space-x-2">
-                         <Plus size={18} />
-                         <span>Add Record</span>
-                      </button>
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => setIsSaleModalOpen(true)}
+                          className="farm-btn-primary text-sm flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700"
+                        >
+                           <Plus size={18} />
+                           <span>Add Sale</span>
+                        </button>
+                        <button 
+                          onClick={() => setIsExpenseModalOpen(true)}
+                          className="farm-btn-primary text-sm flex items-center space-x-2 bg-rose-600 hover:bg-rose-700"
+                        >
+                           <Plus size={18} />
+                           <span>Add Expense</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-col md:flex-row gap-8">
@@ -723,6 +1003,12 @@ export default function App() {
 
         <Footer />
       </main>
+
+      {/* Modals */}
+      {isSaleModalOpen && <SaleModal onClose={() => setIsSaleModalOpen(false)} userUid={user.uid} />}
+      {isExpenseModalOpen && <ExpenseModal onClose={() => setIsExpenseModalOpen(false)} userUid={user.uid} />}
+      {isBatchModalOpen && <BatchModal onClose={() => setIsBatchModalOpen(false)} userUid={user.uid} />}
+      {isHiveModalOpen && <HiveModal onClose={() => setIsHiveModalOpen(false)} userUid={user.uid} />}
     </div>
   );
 }
