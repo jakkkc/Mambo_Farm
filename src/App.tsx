@@ -378,141 +378,138 @@ const HiveModal = ({ onClose, userUid }: { onClose: () => void, userUid: string 
 const DashboardPage = ({ sales, expenses, notifications }: { sales: Sale[], expenses: Expense[], notifications: Notification[] }) => {
   const totalSales = sales.reduce((acc, curr) => acc + curr.totalPrice, 0);
   const totalExpenses = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-  const profit = totalSales - totalExpenses;
-
-  const chartData = [
-    { name: 'Poultry', value: sales.filter(s => s.category === 'Poultry').reduce((a, c) => a + c.totalPrice, 0) },
-    { name: 'Honey', value: sales.filter(s => s.category === 'Honey').reduce((a, c) => a + c.totalPrice, 0) },
-    { name: 'Eggs', value: sales.filter(s => s.category === 'Eggs').reduce((a, c) => a + c.totalPrice, 0) },
-  ];
-
-  const COLORS = ['#059669', '#d97706', '#2563eb', '#7c3aed'];
+  
+  const chartData = sales.slice(0, 7).reverse();
 
   return (
-    <div className="p-4 grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[800px]">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6">
       {/* Performance Chart - Large Grid */}
-      <div className="md:col-span-8 bento-card flex flex-col h-full">
-        <div className="flex justify-between items-start mb-8">
+      <div className="md:col-span-8 bento-card flex flex-col min-h-[400px] lg:min-h-[500px]">
+        <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
           <div>
             <h3 className="text-xl font-black text-slate-900 tracking-tight">Farm Performance</h3>
             <p className="text-sm text-slate-400 font-medium italic">Poultry & Beekeeping Yield</p>
           </div>
-          <div className="flex items-center space-x-2 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-            <Activity size={14} className="text-emerald-500" />
-            <span>REAL-TIME DATA</span>
+          <div className="flex items-center space-x-2 text-[10px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+            <Activity size={12} className="text-emerald-500" />
+            <span className="uppercase tracking-widest">Live Flow</span>
           </div>
         </div>
-        <div className="flex-1 w-full min-h-[300px]">
+        <div className="flex-1 w-full min-h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={sales.slice(0, 7).reverse()}>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={(d) => format(new Date(d), 'MMM d')} 
                 axisLine={false}
                 tickLine={false}
-                tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}}
+                tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 700}}
               />
               <YAxis 
                 axisLine={false}
                 tickLine={false}
-                tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}}
-                tickFormatter={(val) => `KSh ${val/1000}k`}
+                tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 700}}
+                tickFormatter={(val) => `KSh ${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}`}
               />
               <Tooltip 
-                contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+                cursor={{fill: '#f8fafc'}}
+                contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px'}}
+                itemStyle={{fontWeight: 800, fontSize: '12px', color: '#059669'}}
+                labelStyle={{fontWeight: 800, fontSize: '10px', color: '#94a3b8', marginBottom: '4px', textTransform: 'uppercase'}}
               />
-              <Bar dataKey="totalPrice" fill="#059669" radius={[12, 12, 0, 0]} barSize={40} />
+              <Bar dataKey="totalPrice" fill="#059669" radius={[8, 8, 0, 0]} barSize={32} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex justify-center flex-wrap gap-8 mt-6 pt-6 border-t border-slate-50">
+        <div className="flex justify-center flex-wrap gap-x-8 gap-y-2 mt-4 pt-4 border-t border-slate-50">
           <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 bg-brand-primary rounded-full" />
-            <span className="text-xs font-black text-slate-600 uppercase tracking-tighter">Poultry Sales</span>
+            <span className="w-2.5 h-2.5 bg-brand-primary rounded-full" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-tight">Poultry Distribution</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 bg-brand-secondary rounded-full" />
-            <span className="text-xs font-black text-slate-600 uppercase tracking-tighter">Honey Yield</span>
+            <span className="w-2.5 h-2.5 bg-brand-secondary rounded-full" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-tight">Apiary Yield</span>
           </div>
         </div>
       </div>
 
       {/* Alerts/Notifications - Dark Block */}
-      <div className="md:col-span-4 bento-card-dark flex flex-col h-full">
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="w-3 h-3 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_#f43f5e]" />
+      <div className="md:col-span-4 bento-card-dark flex flex-col max-h-[500px]">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse shadow-[0_0_8px_#f43f5e]" />
           <h3 className="text-xl font-black tracking-tight">Active Alerts</h3>
         </div>
-        <div className="flex-1 space-y-4 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 space-y-3 overflow-y-auto pr-2 scrollbar-hide">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-500 italic text-sm">
+            <div className="flex flex-col items-center justify-center h-full text-slate-500 italic text-sm py-12">
               <Bell size={24} className="mb-2 opacity-20" />
-              <p>No active alerts today</p>
+              <p>No active alerts</p>
             </div>
-          ) : notifications.slice(0, 4).map((notif) => (
-            <div key={notif.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 transition-all hover:bg-white/10 group">
-              <p className={cn(
-                "text-[10px] font-black uppercase tracking-widest mb-1",
-                notif.type === 'warning' ? "text-amber-400" : "text-emerald-400"
-              )}>{notif.type}: {notif.title}</p>
-              <p className="text-sm text-slate-300 leading-relaxed font-medium">{notif.message}</p>
-              <div className="mt-3 flex justify-between items-center">
+          ) : notifications.slice(0, 5).map((notif) => (
+            <div key={notif.id} className="bg-white/5 border border-white/5 rounded-2xl p-4 transition-all hover:bg-white/10 group cursor-pointer">
+              <div className="flex justify-between items-start mb-1">
+                <p className={cn(
+                  "text-[9px] font-black uppercase tracking-widest",
+                  notif.type === 'warning' ? "text-amber-400" : "text-emerald-400"
+                )}>{notif.type}</p>
                 <span className="text-[9px] font-bold text-slate-500">{format(new Date(notif.createdAt), 'HH:mm')}</span>
-                <ChevronRight size={14} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
+              <h4 className="text-sm font-bold text-white mb-1 leading-tight">{notif.title}</h4>
+              <p className="text-xs text-slate-400 leading-relaxed font-medium line-clamp-2">{notif.message}</p>
             </div>
           ))}
         </div>
-        <button className="w-full py-3 mt-6 bg-white/10 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/20 transition-all active:scale-95">
-          View All Tasks
+        <button className="w-full py-4 mt-4 bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/20 transition-all active:scale-95">
+          Audit Full Log
         </button>
       </div>
 
       {/* Sales Stats - Minimal Block */}
-      <div className="md:col-span-4 bento-card flex flex-col justify-between">
+      <div className="md:col-span-4 bento-card flex flex-col justify-between p-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-            <TrendingUp size={20} />
+            <TrendingUp size={18} />
           </div>
-          <h4 className="font-black text-slate-900 tracking-tight uppercase text-xs tracking-[0.1em]">Revenue Tracker</h4>
+          <h4 className="font-black text-slate-400 tracking-[0.15em] uppercase text-[10px]">Revenue Growth</h4>
         </div>
         <div>
-          <p className="text-[10px] font-black text-emerald-600 mb-1 uppercase tracking-[0.15em]">+12.5% INCREMENTAL</p>
-          <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-4">{formatCurrency(totalSales)}</p>
-          <div className="h-6 w-full bg-slate-100 rounded-full overflow-hidden p-1 shadow-inner">
+          <div className="flex items-baseline space-x-2">
+            <p className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(totalSales)}</p>
+            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">+12%</span>
+          </div>
+          <div className="h-5 w-full bg-slate-100 rounded-full mt-4 p-1 overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: '75%' }}
-              className="h-full bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+              animate={{ width: '68%' }}
+              className="h-full bg-emerald-500 rounded-full"
             />
           </div>
           <div className="flex justify-between items-center mt-3">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">75% of Monthly Goal</span>
-            <span className="text-[10px] font-black text-slate-900">KSh 300k</span>
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Monthly Target: KSh 500k</span>
+            <span className="text-[9px] font-black text-slate-900">68%</span>
           </div>
         </div>
       </div>
 
       {/* Expense Tracker */}
-      <div className="md:col-span-4 bento-card flex flex-col justify-between">
+      <div className="md:col-span-4 bento-card flex flex-col justify-between p-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-rose-50 text-rose-600 rounded-xl">
-            <TrendingDown size={20} />
+            <TrendingDown size={18} />
           </div>
-          <h4 className="font-black text-slate-900 tracking-tight uppercase text-xs tracking-[0.1em]">Burn Analysis</h4>
+          <h4 className="font-black text-slate-400 tracking-[0.15em] uppercase text-[10px]">Expense Burn</h4>
         </div>
-        <div className="space-y-3">
-          <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-4">{formatCurrency(totalExpenses)}</p>
+        <div className="space-y-4">
+          <p className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(totalExpenses)}</p>
           <div className="space-y-2">
             {[
-              { label: 'Feed & Supplies', val: '65%', color: 'bg-slate-800' },
-              { label: 'Maintenance', val: '20%', color: 'bg-emerald-500' },
-              { label: 'Labor', val: '15%', color: 'bg-slate-300' }
+              { label: 'Infrastructure', val: '42%', color: 'bg-slate-800' },
+              { label: 'Operational', val: '58%', color: 'bg-emerald-500' }
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between group cursor-pointer">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter group-hover:text-slate-900 transition-colors">{item.label}</span>
-                <span className={cn("text-[11px] font-black w-10 text-right", item.label === 'Feed & Supplies' ? 'text-slate-900' : 'text-slate-400')}>{item.val}</span>
+              <div key={item.label} className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{item.label}</span>
+                <span className="text-[10px] font-black text-slate-900">{item.val}</span>
               </div>
             ))}
           </div>
@@ -520,33 +517,28 @@ const DashboardPage = ({ sales, expenses, notifications }: { sales: Sale[], expe
       </div>
 
       {/* Security Block - Accent Block */}
-      <div className="md:col-span-4 bento-card-accent flex flex-col justify-between group overflow-hidden relative">
+      <div className="md:col-span-4 bento-card-accent flex flex-col justify-between group overflow-hidden relative p-6">
         <div className="relative z-10 flex flex-col h-full">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-600/30">
-              <Shield size={20} />
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-lg">
+              <Shield size={18} />
             </div>
-            <h4 className="font-black text-emerald-900 tracking-tight">Security Vault</h4>
+            <h4 className="font-black text-emerald-900 tracking-tight uppercase text-[10px] tracking-widest">Security Core</h4>
           </div>
-          <div className="space-y-4 flex-1">
+          <div className="space-y-3 flex-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-800 truncate">Cloud Integrity Sync</span>
-              <span className="px-2 py-0.5 bg-emerald-200 text-emerald-800 rounded font-black text-[9px] uppercase tracking-wider">Active</span>
+              <span className="text-[11px] font-bold text-emerald-800">IAM Protocols</span>
+              <span className="px-2 py-0.5 bg-emerald-200 text-emerald-800 rounded font-black text-[8px] uppercase tracking-wider">Reinforced</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-800">Last Snapshot</span>
-              <span className="text-[10px] font-black text-emerald-600 font-mono">12:45 PM TODAY</span>
-            </div>
-            <p className="text-[10px] text-emerald-700/60 leading-relaxed font-medium mt-2">
-              All farm records are cryptographically secured and mirrored across 3 availability zones.
+            <p className="text-[10px] text-emerald-700/70 leading-relaxed font-medium">
+              Enterprise encryption layer active for all cloud-synced farm metrics.
             </p>
           </div>
-          <button className="w-full mt-6 py-3 bg-emerald-600 text-white rounded-2xl text-[10px] font-black tracking-[0.1em] uppercase hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-400/20">
-            Manual Archive Now
+          <button className="w-full mt-4 py-3 bg-emerald-600 text-white rounded-xl text-[9px] font-black tracking-[0.1em] uppercase hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-400/20">
+            System Check
           </button>
         </div>
-        {/* Glow decoration */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-300/30 blur-[60px] rounded-full -mr-24 -mt-24 group-hover:scale-150 transition-transform duration-1000" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-300/30 blur-[40px] rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000" />
       </div>
     </div>
   );
@@ -712,7 +704,7 @@ export default function App() {
           notifications={notifications}
         />
         
-        <div className="p-8 flex-1">
+        <div className="p-4 lg:p-8 flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -727,11 +719,11 @@ export default function App() {
               
               {activeTab === 'poultry' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">Poultry Batches</h3>
                     <button 
                       onClick={() => setIsBatchModalOpen(true)}
-                      className="farm-btn-primary flex items-center space-x-2"
+                      className="farm-btn-primary flex items-center space-x-2 w-full sm:w-auto justify-center"
                     >
                       <Plus size={18} />
                       <span>New Batch</span>
@@ -766,11 +758,11 @@ export default function App() {
 
               {activeTab === 'beekeeping' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">Beehives</h3>
                     <button 
                       onClick={() => setIsHiveModalOpen(true)}
-                      className="farm-btn-primary flex items-center space-x-2"
+                      className="farm-btn-primary flex items-center space-x-2 w-full sm:w-auto justify-center"
                     >
                       <Plus size={18} />
                       <span>Add Hive</span>
@@ -801,34 +793,37 @@ export default function App() {
 
               {activeTab === 'finance' && (
                 <div className="space-y-8">
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">Financial Ledger</h3>
-                    <div className="flex space-x-3">
-                      <button className="farm-btn-secondary text-sm">Download Report</button>
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={() => setIsSaleModalOpen(true)}
-                          className="farm-btn-primary text-sm flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700"
-                        >
-                           <Plus size={18} />
-                           <span>Add Sale</span>
-                        </button>
-                        <button 
-                          onClick={() => setIsExpenseModalOpen(true)}
-                          className="farm-btn-primary text-sm flex items-center space-x-2 bg-rose-600 hover:bg-rose-700"
-                        >
-                           <Plus size={18} />
-                           <span>Add Expense</span>
-                        </button>
-                      </div>
+                    <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3 w-full lg:w-auto">
+                      <button className="farm-btn-secondary text-xs sm:text-sm py-3 px-4 order-3 sm:order-1 col-span-2 sm:col-span-1">Download Report</button>
+                      <button 
+                        onClick={() => setIsSaleModalOpen(true)}
+                        className="farm-btn-primary text-xs sm:text-sm flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 py-3 px-4 order-1"
+                      >
+                         <Plus size={16} />
+                         <span>Add Sale</span>
+                      </button>
+                      <button 
+                        onClick={() => setIsExpenseModalOpen(true)}
+                        className="farm-btn-primary text-xs sm:text-sm flex items-center justify-center space-x-2 bg-rose-600 hover:bg-rose-700 py-3 px-4 order-2"
+                      >
+                         <Plus size={16} />
+                         <span>Add Expense</span>
+                      </button>
                     </div>
                   </div>
-                  <div className="flex flex-col md:flex-row gap-8">
-                    <div className="flex-1 space-y-6">
-                      <div className="flex justify-between items-center">
+                  
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    {/* Sales Section */}
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
                         <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter italic">Recent Inflow</h3>
                       </div>
-                      <div className="bento-card p-0 overflow-hidden border-none shadow-none bg-white">
+                      
+                      {/* Desktop Table View */}
+                      <div className="hidden sm:block bento-card p-0 overflow-hidden border-none shadow-xl bg-white">
                         <table className="w-full text-sm">
                           <thead className="bg-slate-50 text-slate-400 font-black uppercase text-[9px] tracking-[0.2em] border-b border-slate-100">
                             <tr>
@@ -850,17 +845,36 @@ export default function App() {
                           </tbody>
                         </table>
                       </div>
+
+                      {/* Mobile Card View */}
+                      <div className="sm:hidden space-y-3">
+                        {sales.length === 0 ? (
+                          <div className="bento-card py-12 text-center text-slate-300 italic">No sales recorded yet</div>
+                        ) : sales.map((sale) => (
+                          <div key={sale.id} className="bento-card flex justify-between items-center py-4">
+                            <div>
+                              <p className="font-black text-slate-900">{sale.item}</p>
+                              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{format(new Date(sale.date), 'MMM d, yyyy')}</p>
+                            </div>
+                            <p className="text-lg font-black text-emerald-600 tracking-tighter">{formatCurrency(sale.totalPrice)}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="flex-1 space-y-6">
-                      <div className="flex justify-between items-center">
+                    {/* Expenses Section */}
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
                         <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter italic">Recent Outflow</h3>
                       </div>
-                      <div className="bento-card p-0 overflow-hidden border-none shadow-none bg-white">
+                      
+                      {/* Desktop Table View */}
+                      <div className="hidden sm:block bento-card p-0 overflow-hidden border-none shadow-xl bg-white">
                         <table className="w-full text-sm">
                           <thead className="bg-slate-50 text-slate-400 font-black uppercase text-[9px] tracking-[0.2em] border-b border-slate-100">
                             <tr>
-                              <th className="px-6 py-4 text-left">Category</th>
+                              <th className="px-6 py-4 text-left">Description</th>
                               <th className="px-6 py-4 text-right">Amount</th>
                               <th className="px-6 py-4 text-right">Date</th>
                             </tr>
@@ -877,6 +891,21 @@ export default function App() {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="sm:hidden space-y-3">
+                        {expenses.length === 0 ? (
+                          <div className="bento-card py-12 text-center text-slate-300 italic">No expenses recorded yet</div>
+                        ) : expenses.map((exp) => (
+                          <div key={exp.id} className="bento-card flex justify-between items-center py-4">
+                            <div>
+                              <p className="font-black text-slate-900">{exp.description}</p>
+                              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{format(new Date(exp.date), 'MMM d, yyyy')}</p>
+                            </div>
+                            <p className="text-lg font-black text-rose-600 tracking-tighter">{formatCurrency(exp.amount)}</p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
